@@ -15,10 +15,9 @@ class Region:
         self.endos = endos
         self.founder = founder
 
-
-file_path = 'region.xml'
-with open(file_path, 'r') as f:
-    df = pd.read_xml(f.read())
-
-
-name = df.iloc[0:1, 0:1]
+#file_path = 'region.xml' # We will do this manually later. Tsk tsk. 
+#with open(file_path, 'r') as f:
+#    df = pd.read_xml(f.read())
+#
+#
+#name = df.iloc[0:1, 0:1]
