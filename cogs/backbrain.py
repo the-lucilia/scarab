@@ -26,7 +26,7 @@ class codes:
         TIMEDTRIGGER = 18 # Same as WATCHTRIGGER, but accepts a single parameter of time to delay, which is not to be modified. (e.g. Wait 2s after trigger region)
 
         UNTRACK = 20 # Stop tracking a target for hit status
-        POINT = 22 # Inform the brainstem of what point to watch for
+        POINT = 22 # Inform the brainstem of an attempt at point
         PING = 24 # Request a heartbeat
         QUERY = 26 # Perform an arbitrary query - in case we need to expand functionality
 
@@ -45,18 +45,24 @@ class codes:
         PONG = 19 # Respond to a heartbeat request
         ANSWER = 21 # Respond to an arbitrary query
         STATUS = 23 # Inform the bot of a status effect that may impact operations, or otherwise a message that should be passed along to the humans in the discord
+        SETPOINT = 25 # Inform the discord of a decision on who is point
 
-
+# I may or may not have stolen this name from the Scythe triology. Fight me. 
 # Supply a command queue and a response queue
-class brainstem(Thread): #Inherit multithreading
-    def __init__(self,mainNation,commands,responses,regionBlock=None,fetchRegions=False):
+class BackBrain(Thread): #Inherit multithreading
+    class states:
+        IDLE = 0 # Default state - nothing happening
+        BOOT = 1 # Initial state - start boot
+
+    def __init__(self,headers,commands,responses,regionBlock=None,fetchRegions=False):
         Thread.__init__(self)
 
         # Thread upkeep and maintenance
-        assert mainNation is not None,"Main nation not supplied" # Throw a fit if an operator nation has not been supplied
-        self.mainNation = mainNation
-        self.commands = commands #Inbound commands from frontend
+        assert headers is not None,"Error: Headers not supplied" #Require headers to exist
+        self.headers = headers #HTTP headers
+        self.commands = commands #Inbound commands from frontend 
         self.responses = responses #Outbound responses to frontend
+
         self.state = None # Current state - e.g. tracking a target for updating
         self.command = None # Currently handled command, or None/idle if none
 
@@ -71,7 +77,7 @@ class brainstem(Thread): #Inherit multithreading
         self.regionsAge = datetime.datetime.now().timestamp() # Timestamp of the last time the regionlist was refreshed
         self.position = 0 # Last known position of update within the list
 
-        # Targetting info
+        # Targeting info
         self.endos = 0 # Endorsements available
         self.tracked = None # Currently tracked trigger (REGION CLASS)
         self.target = None # Currently selected target (REGION CLASS)
@@ -96,6 +102,8 @@ class brainstem(Thread): #Inherit multithreading
         pass 
 
     def run(self):
+        self.responses.put((codes.responses.STATUS,"Backbrain up and running"))
+
         while True:
             if self.commands.empty():
                 if self.state == None or self.state == "idle":
