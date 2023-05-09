@@ -1,0 +1,11 @@
+token.txt
+__ARCHIVE__/
+.vs/
+regions.xml
+regions.xml.gz
+scarab.pyproj
+scarab.pyproj.user
+scarab.sln
+__ARCHIVE__.zip
+__pycache__
+solar.py
