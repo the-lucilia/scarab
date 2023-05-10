@@ -29,6 +29,10 @@ def perform_request(url,headers=headers,data=None):
 
     #r = requests.get("https://www.nationstates.net/cgi-bin/api.cgi?nation=testlandia&q=ping",headers={"User-Agent":"cURL", "X-Password":"lolnicetry")
 
+    if not headers:
+        print("Headers missing from request")
+        return None
+
     if not data: #do we POST?
         r = requests.get(url,headers=headers) #no :(
     else:
@@ -70,3 +74,15 @@ def download_file(url,headers=headers):
             shutil.copyfileobj(r.raw, f)
     
     return local_filename
+
+def nsify(string):
+    return string.lower().replace(" ","_")
+
+def verify_nation(nation,code,headers=headers):
+#    https://www.nationstates.net/cgi-bin/api.cgi?a=verify&nation=(Nation Name)&checksum=(code)
+    r = perform_request(f"https://www.nationstates.net/cgi-bin/api.cgi?a=verify&nation={nation}&checksum={code}",headers=headers)
+#    print(r.text)
+    if "1" in str(r.text):
+        return True
+    else:
+        return False

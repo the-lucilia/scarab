@@ -40,6 +40,8 @@ class codes:
         INCUPD = 38 # Increment updaters by one, for some reason
         DECUPD = 40 # Dec "
 
+        VERIFY = 42 # Send a code and nation name to the backbrain to verify
+
     class responses:
         ABORT = 1 # Inform the parent process there has been a fatal error. 1 argument: None, or string containing error information
         GO = 3 # Inform the parent process the trigger conditions have been met. Parent process should send a GO signal.
@@ -55,6 +57,8 @@ class codes:
         STATUS = 23 # Inform the bot of a status effect that may impact operations, or otherwise a message that should be passed along to the humans in the discord
         SETPOINT = 25 # Inform the discord of a decision on who is point
         UPDATERS = 27 # Inform the CC how many updaters we have. Endos is this -1
+        ROLLCALLED = 29 # Inform the CC of what our roll call is
+        VERIFICATION = 31 # Inform whether or not a verification for the nation named succeeded
 
 # I may or may not have stolen this name from the Scythe triology. Fight me. 
 # Supply a command queue and a response queue
@@ -69,6 +73,7 @@ class BackBrain(Thread): #Inherit multithreading
         # Thread upkeep and maintenance
         assert headers is not None,"Error: Headers not supplied" #Require headers to exist
         self.headers = headers #HTTP headers
+#        print(self.headers)
         self.commands = commands #Inbound commands from frontend 
         self.responses = responses #Outbound responses to frontend
 
@@ -138,7 +143,15 @@ class BackBrain(Thread): #Inherit multithreading
 
                 elif command[0] == codes.commands.GONEUPDATER:
                     self.updaters -= 1
+                    if self.updaters < 0:
+                        self.updaters = 0
                     self.responses.put((codes.responses.UPDATERS,self.updaters)) # How many do we have?
+
+                elif command[0] == codes.commands.VERIFY:
+                    if nationstates.verify_nation(command[2],command[3],headers=self.headers):
+                        self.responses.put((codes.responses.VERIFICATION,command[1], command[2], True))
+                    else:
+                        self.responses.put((codes.responses.VERIFICATION,command[1], command[2], False))
 
                 # TODO: Impliment each and every command code, one by one. 
                 # This will be painful.
