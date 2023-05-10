@@ -4,6 +4,7 @@ from RegionClass import Region
 from RegionBlock import RegionBlock
 import nationstates
 import datetime
+import time
 
 class codes:
     # Control loop->Brainstem (commands) are always even
@@ -27,7 +28,7 @@ class codes:
 
         UNTRACK = 20 # Stop tracking a target for hit status
         POINT = 22 # Inform the brainstem of an attempt at point
-        PING = 24 # Request a heartbeat
+        PING = 24 # Request a heartbeat. One arg: time recieved
         QUERY = 26 # Perform an arbitrary query - in case we need to expand functionality
 
         REFRESHREGIONS = 28 # Refresh the regions list
@@ -67,12 +68,13 @@ class BackBrain(Thread): #Inherit multithreading
         self.command = None # Currently handled command, or None/idle if none
 
         # Update status
-        if fetchRegions:
-            nationstates.downloadRegions()
-        if not regionBlock:
-            self.regionBlock = RegionBlock() # This should be passed to us on bot start, but we can refresh it as needed
-        else:
-            self.regionBlock = regionBlock # Accept custom regionlist
+#        if fetchRegions:
+#            nationstates.downloadRegions()
+#        if not regionBlock:
+#            self.regionBlock = RegionBlock() # This should be passed to us on bot start, but we can refresh it as needed
+#        else:
+#            self.regionBlock = regionBlock # Accept custom regionlist
+        self.regionBlock = regionBlock
 
         self.regionsAge = datetime.datetime.now().timestamp() # Timestamp of the last time the regionlist was refreshed
         self.position = 0 # Last known position of update within the list
@@ -102,7 +104,7 @@ class BackBrain(Thread): #Inherit multithreading
         pass 
 
     def run(self):
-        self.responses.put((codes.responses.STATUS,"Backbrain up and running"))
+#        self.responses.put((codes.responses.STATUS,"Backbrain up and running"))
 
         while True:
             if self.commands.empty():
@@ -118,6 +120,10 @@ class BackBrain(Thread): #Inherit multithreading
                     self.responses.put((codes.responses.STATUS,"Shutting down")) # Inform users of system shutdown
                     self.commands.task_done() #Signal task completed
                     break # Exit loop forevermore
+
+                elif command[0] == codes.commands.PING:
+                    self.responses.put((codes.responses.PONG,))
+                    print(f"Sent a pong at {time.time()}")
                 
                 # TODO: Impliment each and every command code, one by one. 
                 # This will be painful.
