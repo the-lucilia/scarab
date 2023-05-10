@@ -33,6 +33,13 @@ class codes:
 
         REFRESHREGIONS = 28 # Refresh the regions list
 
+        NEWUPDATER = 30
+        GONEUPDATER = 32
+        ADDROLLCALL = 34 # Add someone to roll call
+        ROLLCALL = 36 # Get roll call
+        INCUPD = 38 # Increment updaters by one, for some reason
+        DECUPD = 40 # Dec "
+
     class responses:
         ABORT = 1 # Inform the parent process there has been a fatal error. 1 argument: None, or string containing error information
         GO = 3 # Inform the parent process the trigger conditions have been met. Parent process should send a GO signal.
@@ -47,6 +54,7 @@ class codes:
         ANSWER = 21 # Respond to an arbitrary query
         STATUS = 23 # Inform the bot of a status effect that may impact operations, or otherwise a message that should be passed along to the humans in the discord
         SETPOINT = 25 # Inform the discord of a decision on who is point
+        UPDATERS = 27 # Inform the CC how many updaters we have. Endos is this -1
 
 # I may or may not have stolen this name from the Scythe triology. Fight me. 
 # Supply a command queue and a response queue
@@ -80,7 +88,7 @@ class BackBrain(Thread): #Inherit multithreading
         self.position = 0 # Last known position of update within the list
 
         # Targeting info
-        self.endos = 0 # Endorsements available
+        self.updaters = 0 # Updaters available. Endos is this number -1 (we need a point)
         self.tracked = None # Currently tracked trigger (REGION CLASS)
         self.target = None # Currently selected target (REGION CLASS)
         self.point = None # Designated point
@@ -122,9 +130,16 @@ class BackBrain(Thread): #Inherit multithreading
                     break # Exit loop forevermore
 
                 elif command[0] == codes.commands.PING:
-                    self.responses.put((codes.responses.PONG,))
-                    print(f"Sent a pong at {time.time()}")
+                    self.responses.put((codes.responses.PONG,command[1])) #Send the gotten time right back to it
                 
+                elif command[0] == codes.commands.NEWUPDATER:
+                    self.updaters += 1
+                    self.responses.put((codes.responses.UPDATERS,self.updaters)) # How many do we have?
+
+                elif command[0] == codes.commands.GONEUPDATER:
+                    self.updaters -= 1
+                    self.responses.put((codes.responses.UPDATERS,self.updaters)) # How many do we have?
+
                 # TODO: Impliment each and every command code, one by one. 
                 # This will be painful.
 

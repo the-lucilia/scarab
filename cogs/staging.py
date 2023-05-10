@@ -16,16 +16,16 @@ class staging(commands.Cog):
             )
         await ctx.send(embed=jp_embed)
 
-    @commands.command(aliases=["present"])
-    async def here(self, ctx):
-        user = ctx.message.author
-        present = discord.utils.get(ctx.guild.roles, name="present")
-        if present not in user.roles:
-            await user.add_roles(present)
-            await ctx.send("ROLED")
-        else:
-            await user.remove_roles(present)
-            await ctx.send("UNROLED")
+#    @commands.command(aliases=["present"])
+#    async def here(self, ctx):
+#        user = ctx.message.author
+#        present = discord.utils.get(ctx.guild.roles, name="present")
+#        if present not in user.roles:
+#            await user.add_roles(present)
+#            await ctx.send("ROLED")
+#        else:
+#            await user.remove_roles(present)
+#            await ctx.send("UNROLED")
 
     @commands.command(aliases=["rs", "silence"])
     @commands.has_any_role("command")
