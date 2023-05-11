@@ -36,11 +36,14 @@ class CorpusCallosum(commands.Cog):
 
 #    @commands.Cog.listener() # event
     async def cog_load(self):
+        self.guild = await self.bot.fetch_guild(1039733449805811792)
+        self.tagrole = discord.utils.get(self.guild.roles, name="present")
         self.channel = await self.bot.fetch_channel(1039736266893299843)  #TODO: Rework this! Hardcoding channels is for looooosers
-        await self.channel.send(embed = await MakeEmbed("Backbrain is Online","Awaiting tagging commands"))
+
+#        await self.channel.send(embed = await MakeEmbed("Backbrain is Online","Awaiting tagging commands"))
 
     async def flatline(self):
-        print("Shutting down backbrain")
+        print("Shutting down Backbrain")
         self.commands.put((codes.commands.EXIT,)) # Task the backbrain to shut down
         #self.brainstem.cancel() # Terminate brainstem loop
         
@@ -71,9 +74,19 @@ class CorpusCallosum(commands.Cog):
                         f"Nation {task[2]} could not be confirmed as belonging to {task[1]}",
                         color=0xd90202
                     ) )
-
+            
+            elif task[0] == codes.responses.GO:
+                await self.channel.send(f"{self.tagrole.mention} **GO GO GO**", embed = await MakeEmbed(
+                    "GO GO GO",
+                    f"Now move, sucka (move!)\nNow move, sucka (move!)",
+                    color=0xE9D502
+                ))
 
             self.responses.task_done()
+
+    @commands.command() #This is a bad idea to keep in prod, but I need it for testing
+    async def go(self, ctx):
+        self.commands.put((codes.commands.MANUALGO,))
 
     @commands.command()
     async def ping(self,ctx):

@@ -42,6 +42,9 @@ class codes:
 
         VERIFY = 42 # Send a code and nation name to the backbrain to verify
 
+        INITUPDATERS = 44 # Send a static # of updaters, particularly at boot-time
+        MANUALGO = 46 # For testing
+
     class responses:
         ABORT = 1 # Inform the parent process there has been a fatal error. 1 argument: None, or string containing error information
         GO = 3 # Inform the parent process the trigger conditions have been met. Parent process should send a GO signal.
@@ -152,6 +155,14 @@ class BackBrain(Thread): #Inherit multithreading
                         self.responses.put((codes.responses.VERIFICATION,command[1], command[2], True))
                     else:
                         self.responses.put((codes.responses.VERIFICATION,command[1], command[2], False))
+
+                elif command[0] == codes.commands.INITUPDATERS:
+                    self.updaters = command[1]
+                    if self.updaters > 0:
+                        self.responses.put((codes.responses.UPDATERS, self.updaters))
+
+                elif command[0] == codes.commands.MANUALGO:
+                    self.responses.put((codes.responses.GO,))
 
                 # TODO: Impliment each and every command code, one by one. 
                 # This will be painful.
