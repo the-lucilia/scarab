@@ -9,3 +9,5 @@ scarab.sln
 __ARCHIVE__.zip
 __pycache__
 solar.py
+pyproject.toml
+poetry.lock
