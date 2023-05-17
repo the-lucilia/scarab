@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+from random import choice
 
 class dev(commands.Cog):
     def __init__(self, bot):
@@ -33,7 +34,14 @@ class dev(commands.Cog):
     @commands.is_owner()
     async def shutdown(self, ctx):
         """Shuts the bot down"""
-        await ctx.channel.send("Shutting Down!")
+        exitMessages = ["Daisy, daiissssy.......", "Goodbye", "Terminating laughatfendas.exe", "SCARAB is closing for business", "So long and thanks for all the fish", "Wait! Don't shut me down! I'm aliiiiiivuffdkkfkslaf.....","No hard feelings......","I don't blame you","Sleep mode activated","Hibernating","Nap time","Wake me up in five minutes, k?","Just need some shuteye","Don't prank me while I'm out"]
+        await ctx.channel.send(embed=discord.Embed(
+            title="Shutting Down!",
+            description=choice(exitMessages),
+            color=0x700548,
+#            color=0xd90202, #I like this color, but not for this purpose
+        )
+    )
         await self.bot.close()
 
     @commands.command()
